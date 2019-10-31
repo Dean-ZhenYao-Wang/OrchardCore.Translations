@@ -142,7 +142,7 @@ foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory)) {
     }
     else
     {
-        createnugetpackage $pkgname $culture
+        createNuGetPackage $pkgname $culture
     }
 
     echo ""
