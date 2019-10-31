@@ -112,6 +112,17 @@ function buildNuGetMetaPackageSpec($pkgName)
     $pkgSpecDocument.Save($pkgSpecFilePath)
 }
 
+function isEmptryTranslation($culture)
+{
+    $currentTranslationsFolder = [IO.Path]::Combine($localizationFolderName, $culture)
+    $defaultTranslations = Get-ChildItem $localizationFolderName -File   
+    $currentTranslations = Get-ChildItem $currentTranslationsFolder -File
+    
+    $diff =  Compare-Object -ReferenceObject $currentTranslations -DifferenceObject $defaultTranslations
+
+    return $diff.Length -eq 0
+}
+
 echo "Start generating translations NuGet packages"
 echo ""
 
@@ -124,6 +135,15 @@ foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory)) {
     echo "Creating '$pkgId.$pkgExtension' ..."
 
     createNuGetPackage $pkgName $culture
+
+    if([bool](isemptrytranslation($culture)))
+    {
+        echo "Skipping '$pkgid.$pkgextension' because it's empty"
+    }
+    else
+    {
+        createnugetpackage $pkgname $culture
+    }
 
     echo ""
 }
