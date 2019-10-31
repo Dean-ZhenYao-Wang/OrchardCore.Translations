@@ -112,21 +112,41 @@ function buildNuGetMetaPackageSpec($pkgName)
     $pkgSpecDocument.Save($pkgSpecFilePath)
 }
 
-function isEmptryTranslation($culture)
+function isEmptyTranslation($culture)
 {
     $currentTranslationsFolder = [IO.Path]::Combine($localizationFolderName, $culture)
     $defaultTranslations = Get-ChildItem $localizationFolderName -File   
     $currentTranslations = Get-ChildItem $currentTranslationsFolder -File
-    
-    $diff =  Compare-Object -ReferenceObject $currentTranslations -DifferenceObject $defaultTranslations
+    $nonTranslatedFiles = 0
+    $contentDiff = 14;
+    $minNonTranslatedFiles = 31
 
-    return $diff.Length -eq 0
+    foreach($defaultTranslation in $defaultTranslations)
+    {
+        foreach($currentTranslation in $currentTranslations)
+        {
+            if([IO.Path]::GetFileNameWithoutExtension($defaultTranslation.Name) -ne [IO.Path]::GetFileNameWithoutExtension($currentTranslation.Name))
+            {
+                continue;
+            }
+            
+            $diff = Compare-Object -ReferenceObject $(Get-Content $defaultTranslation.FullName) -DifferenceObject  $(Get-Content $currentTranslation.FullName) | Select -Property InputObject
+            
+            if($diff.InputObject.Length -eq $contentDiff)
+            {
+                ++$nonTranslatedFiles;
+            }
+        }
+    }  
+
+    return $nonTranslatedFiles -ige $minNonTranslatedFiles
 }
 
 echo "Start generating translations NuGet packages"
 echo ""
 
-foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory)) {
+foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory))
+{
     $culture = $cultureFolder.Name
     $pkgName = $pkgNamePrefix + $culture
     $pkgId = "$pkgName.$pkgVersion"
@@ -136,7 +156,7 @@ foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory)) {
 
     createNuGetPackage $pkgName $culture
 
-    if([bool](isemptrytranslation($culture)))
+    if([bool](isEmptyTranslation($culture)))
     {
         echo "Skipping '$pkgid.$pkgextension' because it's empty"
     }
