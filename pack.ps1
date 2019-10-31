@@ -117,9 +117,9 @@ function isEmptyTranslation($culture)
     $currentTranslationsFolder = [IO.Path]::Combine($localizationFolderName, $culture)
     $defaultTranslations = Get-ChildItem $localizationFolderName -File   
     $currentTranslations = Get-ChildItem $currentTranslationsFolder -File
-    $nonTranslatedFiles = 0
+    $nonTranslatedContents = 0
     $contentDiff = 14;
-    $minNonTranslatedFiles = 31
+    $minNonTranslatedContents = 61
 
     foreach($defaultTranslation in $defaultTranslations)
     {
@@ -134,12 +134,12 @@ function isEmptyTranslation($culture)
             
             if($diff.InputObject.Length -eq $contentDiff)
             {
-                ++$nonTranslatedFiles;
+                ++$nonTranslatedContents;
             }
         }
-    }  
+    }
 
-    return $nonTranslatedFiles -ige $minNonTranslatedFiles
+    return $nonTranslatedContents -ige $minNonTranslatedContents
 }
 
 echo "Start generating translations NuGet packages"
