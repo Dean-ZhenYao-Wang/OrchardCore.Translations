@@ -154,8 +154,6 @@ foreach($cultureFolder in $(Get-ChildItem $localizationFolderName -Directory))
     
     echo "Creating '$pkgId.$pkgExtension' ..."
 
-    createNuGetPackage $pkgName $culture
-
     if([bool](isEmptyTranslation($culture)))
     {
         echo "Skipping '$pkgid.$pkgextension' because it's empty"
